@@ -1,0 +1,18 @@
+commands:
+  - name: test1
+    delay: 3s
+    reconcile: 10s
+    runOnStart: true
+    workdir: /tmp
+    cmd: bash
+    args:
+      - -c
+      - "ls -la"
+    env:
+      aa: bb
+      cc: dd
+  - name: test2
+    cmd: nope
+    env:
+      aa: bb
+      cc: dd

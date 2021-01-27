@@ -1,0 +1,109 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s3syncer-config
+data:
+  config.yaml: |
+    commands:
+      - name: push
+        disable: true
+        delay: 3s
+        reconcile: 60s
+        runOnStart: true
+        workdir: /tmp
+        cmd: /usr/local/bin/mc
+        args:
+          - mirror
+          - local-minio/registry
+          - remote-minio/registry
+      - name: simplels2
+        cmd: ls -la
+        env:
+          aa: bb
+          cc: dd
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s3syncer-mc-config
+data:
+  config.json: |
+    {
+      "version": "10",
+      "aliases": {
+        "local-minio": {
+          "url": "http://gitlab-minio-svc.gitlab-ft-test.svc:9000",
+          "accessKey": "vxTDZ47JE1905BFm5eizJlYVtO5JNtHpt5Bk9zAvceOksNgbCNWJkEodwBZVEaOT",
+          "secretKey": "kok0lvTuu9AYOrTMgYWKFrhAAn19MB2c8vpL6TEGnrgM9r7ezlbk7rNzVPusS1Ec",
+          "api": "s3v4",
+          "path": "auto"
+        },
+        "remote-minio": {
+          "url": "http://remote-minio.default.svc:9000",
+          "accessKey": "abTDZ47JE1905BFm5eizJlYVtO5JNtHpt5Bk9zAvceOksNgbCNWJkEodwBZVEaOT",
+          "secretKey": "abk0lvTuu9AYOrTMgYWKFrhAAn19MB2c8vpL6TEGnrgM9r7ezlbk7rNzVPusS1Ec",
+          "api": "s3v4",
+          "path": "auto"
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3syncer
+  labels:
+    app: s3syncer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3syncer
+  template:
+    metadata:
+      labels:
+        app: s3syncer
+    spec:
+      volumes:
+      - name: s3syncer-config
+        configMap:
+          name: s3syncer-config
+      - name: s3syncer-mc-config
+        configMap:
+          name: s3syncer-mc-config
+      containers:
+      - name: s3syncer
+        image: quay.io/ulrichschreiner/s3syncer:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9999
+          initialDelaySeconds: 3
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 2
+        ports:
+        - containerPort: 9999
+        volumeMounts:
+        - mountPath: /etc/s3syncer/
+          name: s3syncer-config
+        - mountPath: /work/mc/
+          name: s3syncer-mc-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3syncer
+  labels:
+    run: s3syncer
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9999
+    targetPort: 9999
+    protocol: TCP
+    name: http
+  selector:
+    app: s3syncer
