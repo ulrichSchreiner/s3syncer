@@ -155,7 +155,13 @@ func trigger(w http.ResponseWriter, r *http.Request) {
 	j, _ := json.Marshal(envelope)
 	if c, ok := config.commands[cmd]; ok {
 		log15.Info("new request", "path", r.URL.Path, "name", cmd, "envelope", envelope, "jdata", string(j))
-		c.trigger()
+		if len(envelope.Events) > 0 {
+			for _, ev := range envelope.Events {
+				if ev.Target.Tag != "" {
+					c.trigger()
+				}
+			}
+		}
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, http.StatusText(http.StatusOK))
 		return
