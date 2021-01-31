@@ -37,6 +37,19 @@ If you want to use specific commands in the webhook, you have to create your own
 image and include your commands/executables to the image. Take the given
 K8S manifest as an example for installation of the hook.
 
+## Concurrency
+
+ `s3syncer` runs webhooks and the nature of webhooks is, that they can occure
+ many times in parallel. As the main idea of this tool is to sync S3 storages to
+ other buckets, a parallel execution of synchronization calls would be overkill.
+ As a consequence **every configured command** will be serialized and the number
+ of calls will be shrinked. So the your trigger `push` of the upper example will
+ be called three times within a second, the system will wait the given `delay`
+ and then invoke the command. When multiple new `push` calls arriving while the
+ command is still running, no new command will be executed. Afther the invocation
+ ends, the system will work on the new invocations, waits the delay and then
+ executes the command again only once.
+
 ## Config Options
 Beneath the name you can set different parameters:
 
@@ -45,7 +58,7 @@ Beneath the name you can set different parameters:
  - `delay`<br>
    The command will be executed after this given duration of silence. Use this
    value to prevent a mass of consecutive calls to the command if many events
-   happen. The systme will wait for the given delay and then trigger the
+   happen. The system will wait for the given delay and then trigger the
    command
  - `reconcile`<br>
    To make sure your comannd will be executed regularly you can specify a
