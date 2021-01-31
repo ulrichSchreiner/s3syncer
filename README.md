@@ -37,6 +37,30 @@ If you want to use specific commands in the webhook, you have to create your own
 image and include your commands/executables to the image. Take the given
 K8S manifest as an example for installation of the hook.
 
+## Config Options
+Beneath the name you can set different parameters:
+
+ - `disable`<br>
+   The command itself will be disabled and not be executed.
+ - `delay`<br>
+   The command will be executed after this given duration of silence. Use this
+   value to prevent a mass of consecutive calls to the command if many events
+   happen. The systme will wait for the given delay and then trigger the
+   command
+ - `reconcile`<br>
+   To make sure your comannd will be executed regularly you can specify a
+   reconcile duration; after this duration the command will be called without
+   a event. If you want to prevent errors when you have network failures, you
+   should regularly reconcile the system.
+ - `runOnStart`<br>
+   As the name suggests, starts the command, when the `s3syncer` itself starts.
+ - `workdir`<br>
+   Specifiy the working directory for the triggered command.
+ - `cmd` / `args`<br>
+   Specify the command and the arguments to execute.
+
+## Distribution Configuration
+
 To call your hook you have to add this hook to your registry config:
 ```yml
 - name: push_event
