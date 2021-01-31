@@ -84,4 +84,4 @@ To call your hook you have to add this hook to your registry config:
   threshold: 5
   backoff: 1s
 ```
-For mor information on this read [the docker docs](https://docs.docker.com/registry/notifications/).
+For more information on this read [the docker docs](https://docs.docker.com/registry/notifications/).
