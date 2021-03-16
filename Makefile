@@ -49,4 +49,4 @@ testcall:
 
 .PHONY:
 dockerimage:
-	docker build -t $(IMAGE):$(SHA) .
+	docker build -t $(IMAGE):latest -t $(IMAGE):$(SHA) .

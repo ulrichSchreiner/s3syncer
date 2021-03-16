@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/inconshreveable/log15"
+	cron "github.com/robfig/cron/v3"
 	"gopkg.in/yaml.v3"
 )
 
@@ -63,6 +64,7 @@ type TriggerCommand struct {
 	Env        map[string]string `yaml:"env"`
 	Delay      time.Duration     `yaml:"delay"`
 	Reconcile  time.Duration     `yaml:"reconcile"`
+	RunAt      string            `yaml:"runAt"`
 	RunOnStart bool              `yaml:"runOnStart"`
 	Disable    bool              `yaml:"disable"`
 }
@@ -120,6 +122,15 @@ func (dbc *DebouncedCommand) trigger() {
 func (dbc *DebouncedCommand) debounce() {
 	if dbc.Cmd.RunOnStart {
 		dbc.execCommand()
+	}
+	if dbc.Cmd.RunAt != "" {
+		c := cron.New()
+		_, err := c.AddFunc(dbc.Cmd.RunAt, dbc.trigger)
+		if err != nil {
+			log15.Error("cannot add cron", "error", err)
+		} else {
+			c.Start()
+		}
 	}
 	ok := false
 	timer := time.NewTimer(dbc.Cmd.Delay)

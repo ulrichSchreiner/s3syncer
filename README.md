@@ -69,6 +69,9 @@ Beneath the name you can set different parameters:
    should regularly reconcile the system.
  - `runOnStart`<br>
    As the name suggests, starts the command, when the `s3syncer` itself starts.
+ - `runAt`<br>
+   Triggers the command at the given cronspec. Like `reconcile` but with cron
+   syntax so you can specify exact clock times for the reconcile call.
  - `workdir`<br>
    Specifiy the working directory for the triggered command.
  - `cmd` / `args`<br>
