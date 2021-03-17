@@ -18,6 +18,8 @@ import (
 const (
 	triggerPath = "/trigger/"
 	healthyPath = "/health"
+
+	evPUSH = "push"
 )
 
 var (
@@ -168,7 +170,7 @@ func trigger(w http.ResponseWriter, r *http.Request) {
 		log15.Info("new request", "path", r.URL.Path, "name", cmd, "envelope", envelope, "jdata", string(j))
 		if len(envelope.Events) > 0 {
 			for _, ev := range envelope.Events {
-				if ev.Target.Tag != "" {
+				if ev.Action == evPUSH && ev.Target.Tag != "" {
 					c.trigger()
 				}
 			}
