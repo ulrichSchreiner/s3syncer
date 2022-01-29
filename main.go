@@ -105,7 +105,7 @@ func (dbc *DebouncedCommand) execCommand() {
 	if err != nil {
 		log15.Error("command failed", "name", dbc.Cmd.Name, "duration", d, "cmd", dbc.Cmd.Cmd, "args", dbc.Cmd.Args, "environment", environ, "output", string(out), "error", err)
 	} else {
-		log15.Info("command executed", "name", dbc.Cmd.Name, "duration", d, "cmd", dbc.Cmd.Cmd, "args", dbc.Cmd.Args, "environment", environ, "output", string(out))
+		log15.Info("command executed", "name", dbc.Cmd.Name, "duration", d, "cmd", dbc.Cmd.Cmd, "args", dbc.Cmd.Args, "environment", environ)
 	}
 }
 
@@ -167,10 +167,10 @@ func trigger(w http.ResponseWriter, r *http.Request) {
 	}
 	j, _ := json.Marshal(envelope)
 	if c, ok := config.commands[cmd]; ok {
-		log15.Info("new request", "path", r.URL.Path, "name", cmd, "envelope", envelope, "jdata", string(j))
 		if len(envelope.Events) > 0 {
 			for _, ev := range envelope.Events {
 				if ev.Action == evPUSH && ev.Target.Tag != "" {
+					log15.Info("new trigger request", "path", r.URL.Path, "name", cmd, "envelope", envelope, "jdata", string(j))
 					c.trigger()
 				}
 			}
