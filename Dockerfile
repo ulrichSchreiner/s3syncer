@@ -1,4 +1,4 @@
-FROM registry.gitlab.com/ulrichschreiner/base/debian:buster-slim
+FROM registry.gitlab.com/ulrichschreiner/base/ubuntu:24.04
 
 RUN apt -y update && \
     apt -y install ca-certificates curl tzdata && \
